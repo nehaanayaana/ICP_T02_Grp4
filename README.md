@@ -10,15 +10,3 @@ This app was refactored from [a16z's implementation](https://github.com/a16z-inf
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://icpchatbot.streamlit.app/))
 
-## Prerequisite libraries
-
-```
-streamlit
-replicate
-```
-
-## Getting your own Replicate API token
-
-To use this app, you'll need to get your own [Replicate](https://replicate.com/) API token.
-
-After signing up to Replicate, you can access your API token from [this page](https://replicate.com/account/api-tokens).
