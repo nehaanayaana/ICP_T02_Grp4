@@ -8,5 +8,5 @@ This app was refactored from [a16z's implementation](https://github.com/a16z-inf
 
 ## Demo App
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://icpchatbot.streamlit.app/))
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://icpchatbot.streamlit.app/)
 
