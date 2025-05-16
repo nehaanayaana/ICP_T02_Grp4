@@ -1,6 +1,6 @@
 # PalmPal 🌴🤖
 
-PalmPal is a recommendation project, where we create a chatbot. This chatbot is created using the open-source Llama 2 LLM model from Meta.
+PalmPal is a recommendation project, where we create a chatbot. This chatbot is created using the open-source Llama 3 LLM model from Meta.
 
 Particularly, we're using the [**Llama2-7B**](https://replicate.com/a16z-infra/llama7b-v2-chat) model deployed by the Andreessen Horowitz (a16z) team and hosted on the [Replicate](https://replicate.com/) platform.
 
