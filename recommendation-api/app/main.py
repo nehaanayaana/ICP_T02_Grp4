@@ -4,11 +4,20 @@ import numpy as np
 
 app = Flask(__name__)
 
-# Load models and encoders
-model = joblib.load('als_model.pkl')
-user_enc = joblib.load('user_encoder.pkl')
-product_enc = joblib.load('product_encoder.pkl')
-product_reverse_map = joblib.load('product_reverse_map.pkl')
+import os
+import joblib
+
+# Get base path of current file
+base_path = os.path.dirname(__file__)
+
+# Path to models folder (up one level, then into models)
+model_dir = os.path.join(base_path, '..', 'models')
+
+als_model = joblib.load(os.path.join(model_dir, 'als_model.pkl'))
+user_enc = joblib.load(os.path.join(model_dir, 'user_encoder.pkl'))
+product_enc = joblib.load(os.path.join(model_dir, 'product_encoder.pkl'))
+product_reverse_map = joblib.load(os.path.join(model_dir, 'product_reverse_map.pkl'))
+
 
 # Example function: recommend products for a user using ALS model
 def recommend_products_for_user(user_id, N=10):
