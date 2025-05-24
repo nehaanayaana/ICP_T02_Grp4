@@ -97,7 +97,7 @@ def similar_products(product_id: str, N: int = 5):
 from pydantic import BaseModel
 class Feedback(BaseModel):
     user_id: str
-    item_id: str
+    product_id: str
     interaction: str
     timestamp: str  # ISO 8601 format
 
