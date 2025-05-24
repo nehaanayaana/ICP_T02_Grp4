@@ -90,25 +90,39 @@ def similar_products(product_id: str, N: int = 5):
     return {"product_id": product_id, "similar_products": sims}
 
 
-# 4.1.3. Submit E-Commerce Recommendation Feedback
-# This endpoint allows the application or API service to submit feedback on 
-# recommendations, which helps improve the recommendation algorithm over time through 
-# periodic learning.
 from pydantic import BaseModel
+from datetime import datetime
+import pickle
+
+known_products = set(product_encoder.classes_)
+
 class Feedback(BaseModel):
     user_id: str
     product_id: str
     interaction: str
-    timestamp: str  # ISO 8601 format
+    timestamp: str
 
-# Simulated feedback storage
-feedback_store = []
+feedback_db = []
 
-@app.post("/submit-feedback")
+@app.post("/api/v1/ecommerce/recommendations/feedback")
 def submit_feedback(feedback: Feedback):
-    # Store or forward feedback
-    feedback_store.append(feedback.dict())
-    return {"message": "Feedback submitted successfully", "data": feedback}
+    # Check user_id existence
+    if feedback.user_id not in known_users:
+        raise HTTPException(status_code=404, detail=f"User '{feedback.user_id}' not found")
+
+    # Check if product_id is known
+    if feedback.product_id not in known_products:
+        raise HTTPException(status_code=404, detail=f"Product '{feedback.product_id}' not found")
+
+    # Validate timestamp format
+    try:
+        datetime.fromisoformat(feedback.timestamp.replace("Z", "+00:00"))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid timestamp format. Use ISO 8601.")
+
+    feedback_db.append(feedback.dict())
+    return {"message": "Feedback submitted successfully", "status": "success"}
+
 
 
 if __name__ == "__main__":
