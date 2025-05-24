@@ -6,7 +6,12 @@ Particularly, we're using the [**Llama2-7B**](https://replicate.com/a16z-infra/l
 
 This app was refactored from [a16z's implementation](https://github.com/a16z-infra/llama2-chatbot) of their [LLaMA2 Chatbot](https://www.llama2.ai/) to be light-weight for deployment to the [Streamlit Community Cloud](https://streamlit.io/cloud).
 
-## Demo App
+## Demo Chatbot Website
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://icpchatbot.streamlit.app/)
+
+## Demo API Website
+
+[![FastAPI App](https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png)](https://icp-t02-grp4-api.onrender.com)
+
 
