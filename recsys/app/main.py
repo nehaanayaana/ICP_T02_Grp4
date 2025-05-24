@@ -4,22 +4,12 @@ from typing import Dict, Any
 import os
 import pandas as pd
 
-# from recommendation import (
-#     recommend_products_for_user,
-#     get_similar_products,
-#     model,
-#     user_encoder,
-#     product_reverse_map,
-#     ratings,
-#     user_items_csr  # make sure to import if used in recommend_products_for_user
-# )
-
 from .recommendation import (
     recommend_products_for_user,
     recommend_similar_products,  # Correct function name here
     model,
     user_encoder,
-    product_encoder,            # Add this import
+    product_encoder,           
     product_reverse_map,
     ratings,
     user_items_csr
@@ -53,6 +43,10 @@ known_users = set(user_encoder.classes_)
 def root() -> Dict[str, str]:
     return {"message": "Welcome to the E-Commerce Recommendation API"}
 
+# 4.1.1. Get E-Commerce User Recommendation
+# This endpoint provides personalized product recommendations for a specific user 
+# based on their plantation data, purchase history, and behavioral patterns. 
+# It should return a list of at most 10 recommended products sorted by relevance score.
 @app.get("/api/v1/ecommerce/recommendations/user/{user_id}", response_model=Dict[str, Any])
 def get_user_recommendations(user_id: str, N: int = 5) -> Dict[str, Any]:
     if user_id not in known_users:
@@ -74,9 +68,11 @@ def get_user_recommendations(user_id: str, N: int = 5) -> Dict[str, Any]:
         "count": len(recommendations),
     }
 
-
-
-
+# 4.1.2. Get E-Commerce Similar Products Recommendations
+# This endpoint retrieves products that are similar to a specified product, based on
+# various similarity metrics such as product attributes, usage patterns, or complementary 
+# functions. It helps users discover alternatives or complementary items to products they're
+# already interested in. This will return at most 10 recommended products.
 @app.get("/api/v1/ecommerce/recommendations/products/{product_id}", response_model=Dict[str, Any])
 def similar_products(product_id: str, N: int = 5):
     # Check if product_id is known
@@ -93,6 +89,26 @@ def similar_products(product_id: str, N: int = 5):
     )
     return {"product_id": product_id, "similar_products": sims}
 
+
+# 4.1.3. Submit E-Commerce Recommendation Feedback
+# This endpoint allows the application or API service to submit feedback on 
+# recommendations, which helps improve the recommendation algorithm over time through 
+# periodic learning.
+from pydantic import BaseModel
+class Feedback(BaseModel):
+    user_id: str
+    item_id: str
+    interaction: str
+    timestamp: str  # ISO 8601 format
+
+# Simulated feedback storage
+feedback_store = []
+
+@app.post("/submit-feedback")
+def submit_feedback(feedback: Feedback):
+    # Store or forward feedback
+    feedback_store.append(feedback.dict())
+    return {"message": "Feedback submitted successfully", "data": feedback}
 
 
 if __name__ == "__main__":
