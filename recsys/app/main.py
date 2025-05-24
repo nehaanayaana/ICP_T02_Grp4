@@ -16,7 +16,28 @@ from .recommendation import (
 )
 
 
-app = FastAPI(title="E-Commerce Recommendation API")
+app = FastAPI(
+    title="TokoSawit Product Recommendation API",
+    description=(
+        "This API provides a recommendation system for TokoSawit. "
+        "TokoSawit is an e-commerce platform that is part of the SawitPRO platform, "
+        "offering a wide range of plantation equipment and supplies targeted at "
+        "Indonesian palm plantation smallholders."
+    ),
+    terms_of_service="https://www.sawitpro.com/term-and-condition",
+    license_info={
+        "name": "Proprietary",
+        "url": "https://www.sawitpro.com/license",
+    },
+    version="1.0.0",
+    servers=[
+        {
+            "url": "https://icp-t02-grp4-api.onrender.com",
+            "description": "The best project will be deployed at this endpoint.",
+        }
+    ],
+)
+
 
 # CORS middleware - allow all origins for development, restrict for production
 app.add_middleware(
