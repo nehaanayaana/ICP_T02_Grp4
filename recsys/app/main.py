@@ -14,7 +14,7 @@ import pandas as pd
 #     user_items_csr  # make sure to import if used in recommend_products_for_user
 # )
 
-from recommendation import (
+from .recommendation import (
     recommend_products_for_user,
     recommend_similar_products,  # Correct function name here
     model,
