@@ -11,7 +11,7 @@ This app was refactored from [a16z's implementation](https://github.com/a16z-inf
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://icpchatbot.streamlit.app/)
 
 ## Demo API Website
-
-[![FastAPI App])](https://icp-t02-grp4-api.onrender.com)
+https://icp-t02-grp4-api.onrender.com
+https://icp-t02-grp4-api.onrender.com/docs
 
 
