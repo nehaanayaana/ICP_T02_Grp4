@@ -12,6 +12,6 @@ This app was refactored from [a16z's implementation](https://github.com/a16z-inf
 
 ## Demo API Website
 
-[![FastAPI App](https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png)](https://icp-t02-grp4-api.onrender.com)
+[![FastAPI App](https://fastapi.tiangolo.com/img/icon-white.svg)](https://icp-t02-grp4-api.onrender.com)
 
 
