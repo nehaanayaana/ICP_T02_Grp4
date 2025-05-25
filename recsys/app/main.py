@@ -5,7 +5,7 @@ from uuid import UUID
 import os
 import pandas as pd
 
-from models import (
+from .models import (
     ApiV1EcommerceRecommendationFeedbackPostRequestBody,
     ApiV1EcommerceRecommendationFeedbackPostResponse,
     ApiV1EcommerceRecommendationUserGet200Response,
@@ -18,7 +18,7 @@ from models import (
     RecommendedProductListItem,
 )
 
-from inference import (
+from .inference import (
     recommend_products_for_user,
     recommend_similar_products,
     als_model,
