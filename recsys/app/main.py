@@ -1,57 +1,55 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Dict, Any
+from typing import Union
+from uuid import UUID
 import os
 import pandas as pd
 
-from .recommendation import (
+from models import (
+    ApiV1EcommerceRecommendationFeedbackPostRequestBody,
+    ApiV1EcommerceRecommendationFeedbackPostResponse,
+    ApiV1EcommerceRecommendationUserGet200Response,
+    ApiV1EcommerceRecommendationUserProductPost200Response,
+    ApiV1MessagingChatbotPostRequestBody,
+    ApiV1MessagingChatbotPost200Response,
+    ErrorResponse,
+    PingGet200Response,
+    RecommendedProductList,
+    RecommendedProductListItem,
+)
+
+from inference import (
     recommend_products_for_user,
-    recommend_similar_products,  # Correct function name here
-    model,
+    recommend_similar_products,
+    als_model,
     user_encoder,
-    product_encoder,           
+    product_encoder,
     product_reverse_map,
     ratings,
-    user_items_csr
+    user_items_csr,
 )
-
 
 app = FastAPI(
-    title="TokoSawit Product Recommendation API",
+    title='TokoSawit ProductRecommendation API',
     description=(
-        "This API provides a recommendation system for TokoSawit. "
-        "TokoSawit is an e-commerce platform that is part of the SawitPRO platform, "
-        "offering a wide range of plantation equipment and supplies targeted at "
-        "Indonesian palm plantation smallholders."
+        'This API provides recommendation system for TokoSawit. TokoSawit is an e-commerce platform, '
+        'part of SawitPRO targeting Indonesian palm plantation smallholders.'
     ),
-    terms_of_service="https://www.sawitpro.com/term-and-condition",
-    license_info={
-        "name": "Proprietary",
-        "url": "https://www.sawitpro.com/license",
-    },
-    version="1.0.0",
-    servers=[
-        {
-            "url": "https://icp-t02-grp4-api.onrender.com",
-            "description": "The best project will be deployed at this endpoint.",
-        }
-    ],
+    version='1.0.0',
 )
 
-
-# CORS middleware - allow all origins for development, restrict for production
+# CORS Middleware - allow all origins for now (restrict in prod)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: restrict in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Load product info CSV; fallback to empty DataFrame if not found
+# Load product info CSV; fallback to empty DataFrame if missing
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-df_sale_path = os.path.join(BASE_DIR, "data", "df_sale.csv")  # Adjust path accordingly
-
+df_sale_path = os.path.join(BASE_DIR, "data", "df_sale.csv")
 try:
     df_sale = pd.read_csv(df_sale_path)
 except FileNotFoundError:
@@ -59,93 +57,102 @@ except FileNotFoundError:
     print(f"Warning: df_sale.csv not found at {df_sale_path}, product info will be empty")
 
 known_users = set(user_encoder.classes_)
+known_products = set(product_encoder.classes_)
 
-@app.get("/", response_model=Dict[str, str])
-def root() -> Dict[str, str]:
-    return {"message": "Welcome to the E-Commerce Recommendation API"}
+# In-memory feedback storage (for demo)
+feedback_db = []
 
-# 4.1.1. Get E-Commerce User Recommendation
-# This endpoint provides personalized product recommendations for a specific user 
-# based on their plantation data, purchase history, and behavioral patterns. 
-# It should return a list of at most 10 recommended products sorted by relevance score.
-@app.get("/api/v1/ecommerce/recommendations/user/{user_id}", response_model=Dict[str, Any])
-def get_user_recommendations(user_id: str, N: int = 5) -> Dict[str, Any]:
-    if user_id not in known_users:
-        raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
+@app.get('/ping', response_model=PingGet200Response)
+def ping() -> PingGet200Response:
+    return PingGet200Response(message="pong")
 
-    recommendations = recommend_products_for_user(
-        user_id=user_id,
-        model=model,
+@app.get("/")
+def root():
+    return {"message": "Welcome to the TokoSawit ProductRecommendation API"}
+
+@app.get(
+    '/api/v1/ecommerce/recommendation/user/{user_id}',
+    response_model=ApiV1EcommerceRecommendationUserGet200Response,
+    responses={'404': {'model': ErrorResponse}},
+)
+def recommend_for_user(user_id: UUID, N: int = 10):
+    user_id_str = str(user_id)
+    if user_id_str not in known_users:
+        raise HTTPException(status_code=404, detail=f"User '{user_id_str}' not found")
+
+    recs = recommend_products_for_user(
+        user_id=user_id_str,
+        model=als_model,
         user_encoder=user_encoder,
         product_reverse_map=product_reverse_map,
         ratings=ratings,
         df_sale=df_sale,
-        N=N
+        N=N,
     )
 
-    return {
-        "user_id": user_id,
-        "recommendations": recommendations,
-        "count": len(recommendations),
-    }
+    items = [RecommendedProductListItem(**r) for r in recs]
+    return ApiV1EcommerceRecommendationUserGet200Response(items=RecommendedProductList(root=items))
 
-# 4.1.2. Get E-Commerce Similar Products Recommendations
-# This endpoint retrieves products that are similar to a specified product, based on
-# various similarity metrics such as product attributes, usage patterns, or complementary 
-# functions. It helps users discover alternatives or complementary items to products they're
-# already interested in. This will return at most 10 recommended products.
-@app.get("/api/v1/ecommerce/recommendations/products/{product_id}", response_model=Dict[str, Any])
-def similar_products(product_id: str, N: int = 5):
-    # Check if product_id is known
-    if product_id not in product_encoder.classes_:
-        raise HTTPException(status_code=404, detail=f"Product '{product_id}' not found")
+@app.get(
+    '/api/v1/ecommerce/recommendation/product/{product_id}',
+    response_model=ApiV1EcommerceRecommendationUserProductPost200Response,
+    responses={'404': {'model': ErrorResponse}},
+)
+def recommend_similar_products_api(product_id: UUID, N: int = 10):
+    product_id_str = str(product_id)
+    if product_id_str not in known_products:
+        raise HTTPException(status_code=404, detail=f"Product '{product_id_str}' not found")
 
     sims = recommend_similar_products(
-        product_id=product_id,
-        model=model,
+        product_id=product_id_str,
+        model=als_model,
         product_encoder=product_encoder,
         product_reverse_map=product_reverse_map,
-        df_product=df_sale,
-        N=N
+        df_sale=df_sale,
+        N=N,
     )
-    return {"product_id": product_id, "similar_products": sims}
 
+    items = [RecommendedProductListItem(**s) for s in sims]
+    return ApiV1EcommerceRecommendationUserProductPost200Response(items=RecommendedProductList(root=items))
 
-from pydantic import BaseModel
-from datetime import datetime
-import pickle
+@app.post(
+    "/api/v1/ecommerce/recommendation/feedback",
+    response_model=ApiV1EcommerceRecommendationFeedbackPostResponse,
+    responses={"404": {"model": ErrorResponse}},
+)
+async def feedback(
+    body: ApiV1EcommerceRecommendationFeedbackPostRequestBody = Body(...)
+):
+    user_id_str = str(body.user_id)
+    product_id_str = str(body.product_id)
 
-known_products = set(product_encoder.classes_)
+    if user_id_str not in known_users:
+        raise HTTPException(status_code=404, detail=f"User '{user_id_str}' not found")
 
-class Feedback(BaseModel):
-    user_id: str
-    product_id: str
-    interaction: str
-    timestamp: str
+    if product_id_str not in known_products:
+        raise HTTPException(status_code=404, detail=f"Product '{product_id_str}' not found")
 
-feedback_db = []
+    feedback_db.append(body.dict())
+    return ApiV1EcommerceRecommendationFeedbackPostResponse(message="Feedback submitted successfully")
 
-@app.post("/api/v1/ecommerce/recommendations/feedback")
-def submit_feedback(feedback: Feedback):
-    # Check user_id existence
-    if feedback.user_id not in known_users:
-        raise HTTPException(status_code=404, detail=f"User '{feedback.user_id}' not found")
+@app.post(
+    "/api/v1/messaging/chatbot",
+    response_model=ApiV1MessagingChatbotPost200Response,
+    responses={"400": {"model": ErrorResponse}},
+)
+async def chatbot(
+    body: ApiV1MessagingChatbotPostRequestBody = Body(...)
+):
+    user_id_str = str(body.user_id)
+    user_message = body.message
 
-    # Check if product_id is known
-    if feedback.product_id not in known_products:
-        raise HTTPException(status_code=404, detail=f"Product '{feedback.product_id}' not found")
+    # TODO: Replace with actual chatbot logic or ML model call
+    reply = "Hi, how can I help you today?"
+    recommended_products = None  # Optionally add RecommendedProductList here
 
-    # Validate timestamp format
-    try:
-        datetime.fromisoformat(feedback.timestamp.replace("Z", "+00:00"))
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid timestamp format. Use ISO 8601.")
-
-    feedback_db.append(feedback.dict())
-    return {"message": "Feedback submitted successfully", "status": "success"}
-
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    return ApiV1MessagingChatbotPost200Response(
+        message=reply,
+        recommended_products=recommended_products,
+    )
+    items = [RecommendedProductListItem(**r) for r in sims]
+    return ApiV1EcommerceRecommendationUserProductPost200Response(items=RecommendedProductList(root=items))
