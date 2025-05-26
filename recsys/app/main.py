@@ -4,8 +4,14 @@ from typing import Union
 from uuid import UUID
 import os
 import pandas as pd
+from typing import List
+import logging
 
-from .models import (
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+
+from app.models import (
     ApiV1EcommerceRecommendationFeedbackPostRequestBody,
     ApiV1EcommerceRecommendationFeedbackPostResponse,
     ApiV1EcommerceRecommendationUserGet200Response,
@@ -15,10 +21,10 @@ from .models import (
     ErrorResponse,
     PingGet200Response,
     RecommendedProductList,
-    RecommendedProductListItem,
+    RecommendedProductListItem
 )
 
-from .inference import (
+from app.inference import (
     recommend_products_for_user,
     recommend_similar_products,
     als_model,
@@ -70,13 +76,25 @@ def ping() -> PingGet200Response:
 def root():
     return {"message": "Welcome to the TokoSawit ProductRecommendation API"}
 
+
+
+
+from fastapi import APIRouter, HTTPException
+from uuid import UUID
+from typing import List
+
+
+import uuid
+
+
 @app.get(
     '/api/v1/ecommerce/recommendation/user/{user_id}',
     response_model=ApiV1EcommerceRecommendationUserGet200Response,
-    responses={'404': {'model': ErrorResponse}},
+    responses={404: {"model": ErrorResponse}},
 )
 def recommend_for_user(user_id: UUID, N: int = 10):
     user_id_str = str(user_id)
+    
     if user_id_str not in known_users:
         raise HTTPException(status_code=404, detail=f"User '{user_id_str}' not found")
 
@@ -87,11 +105,50 @@ def recommend_for_user(user_id: UUID, N: int = 10):
         product_reverse_map=product_reverse_map,
         ratings=ratings,
         df_sale=df_sale,
+        user_items_csr=user_items_csr,
         N=N,
     )
 
-    items = [RecommendedProductListItem(**r) for r in recs]
-    return ApiV1EcommerceRecommendationUserGet200Response(items=RecommendedProductList(root=items))
+    items = []
+    for rec in recs:
+        try:
+            pid = rec.get("product_id")
+            score = rec.get("relevance_score", 0.0)
+
+            # Lookup product details by product_id only
+            if df_sale.empty:
+                product_name_en = "Unknown Product"
+                price = None
+                product_type = "Unknown"
+            else:
+                product_row = df_sale.loc[df_sale['product_id'] == pid]
+                if product_row.empty:
+                    product_name_en = "Unknown Product"
+                    price = None
+                    product_type = "Unknown"
+                else:
+                    product_name_en = product_row.iloc[0].get("product_name_en", "Unknown Product")
+                    price = product_row.iloc[0].get("price", None)
+                    product_type = product_row.iloc[0].get("product_type", "Unknown")
+
+            product_info = {
+                "product_id": pid,
+                "product_name_en": product_name_en,
+                "price": price,
+                "product_type": product_type,
+                "relevance_score": float(score),
+                "recommendation_id": str(uuid.uuid4()),
+            }
+            item = RecommendedProductListItem(**product_info)
+            items.append(item)
+        except Exception as e:
+            logger.error(f"Failed to parse recommended product item: {e}")
+            continue
+
+    return ApiV1EcommerceRecommendationUserGet200Response(
+        items=RecommendedProductList(root=items)
+    )
+
 
 @app.get(
     '/api/v1/ecommerce/recommendation/product/{product_id}',
