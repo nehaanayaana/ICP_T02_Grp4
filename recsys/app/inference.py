@@ -198,11 +198,19 @@ if __name__ == "__main__":
     test_user = user_encoder.classes_[0]
     test_product = product_encoder.classes_[0]
 
-    print(f"\nRecommendations for user '{test_user}':")
     for rec in recommend_products_for_user(
-        test_user, als_model, user_encoder, product_reverse_map, ratings, df_sale, fallback_list=df_sale, N=5
+        test_user,
+        als_model,
+        user_encoder,
+        product_reverse_map,
+        user_items_csr, 
+        ratings,
+        df_sale,
+        fallback_list=df_sale,
+        N=5
     ):
         print(rec)
+
 
     print(f"\nSimilar products to '{test_product}':")
     for rec in recommend_similar_products(
