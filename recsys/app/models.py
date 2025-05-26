@@ -7,7 +7,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, RootModel
 
-
 class RecommendedProductListItem(BaseModel):
     product_id: UUID = Field(
         ...,
@@ -96,7 +95,6 @@ class ErrorResponse(BaseModel):
 
 class ApiV1EcommerceRecommendationFeedbackPostResponse(BaseModel):
     message: str = Field(..., example="Feedback given successfully")
-
 
 class RecommendedProductList(RootModel[List[RecommendedProductListItem]]):
     root: List[RecommendedProductListItem]
