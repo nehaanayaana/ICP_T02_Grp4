@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 # importing models
-from app.models import (
+from .models import (
     ApiV1EcommerceRecommendationFeedbackPostRequestBody,
     ApiV1EcommerceRecommendationFeedbackPostResponse,
     ApiV1EcommerceRecommendationUserProductPost200Response,  
@@ -26,7 +26,7 @@ from app.models import (
 )
 
 # importing inference logic
-from app.inference import (
+from .inference import (
     recommend_products_for_user,
     recommend_similar_products,
     als_model,
