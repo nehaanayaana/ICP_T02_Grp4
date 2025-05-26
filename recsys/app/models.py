@@ -64,6 +64,34 @@ class ApiV1EcommerceRecommendationFeedbackPostRequestBody(BaseModel):
     )
 
 
+
+class RecommendedProductListItemSimple(BaseModel):
+    product_id: UUID = Field(
+        ...,
+        description="The ID of the product.",
+        example="123e4567-e89b-12d3-a456-426614174000",
+    )
+    product_name_en: Optional[str] = Field(
+        None, description="The name of the product.", example="Fertilizer ABC"
+    )
+    product_type: Optional[str] = Field(
+        None, description="The category of the product.", example="Fertilizer"
+    )
+    price: Optional[float] = Field(
+        None, description="The price of the product in IDR.", example=100000
+    )
+
+from pydantic import RootModel
+from typing import List
+
+class RecommendedProductListSimple(RootModel[List[RecommendedProductListItemSimple]]):
+    pass
+
+class RecommendedProductList(RootModel[List[RecommendedProductListItem]]):
+    pass
+
+
+
 class ApiV1MessagingChatbotPostRequestBody(BaseModel):
     user_id: UUID = Field(
         ...,
@@ -75,6 +103,11 @@ class ApiV1MessagingChatbotPostRequestBody(BaseModel):
         description="Message sent to chatbot in markdown format.",
         example="Hello, how are you?",
     )
+
+from typing import List
+from pydantic import BaseModel
+
+
 
 
 class PingGet200Response(BaseModel):
@@ -96,9 +129,15 @@ class ErrorResponse(BaseModel):
 class ApiV1EcommerceRecommendationFeedbackPostResponse(BaseModel):
     message: str = Field(..., example="Feedback given successfully")
 
-class RecommendedProductList(RootModel[List[RecommendedProductListItem]]):
-    root: List[RecommendedProductListItem]
 
+from pydantic import RootModel
+
+class RecommendedProductList(RootModel[List[RecommendedProductListItem]]):
+    pass
+
+
+
+from typing import Optional
 
 class ApiV1MessagingChatbotPost200Response(BaseModel):
     message: str = Field(
@@ -106,12 +145,14 @@ class ApiV1MessagingChatbotPost200Response(BaseModel):
         description="Chatbot reply message in markdown.",
         example="Hi, how can I help you today?",
     )
-    recommended_products: Optional[RecommendedProductList] = None
+    recommended_products: Optional[RecommendedProductListSimple] = None
 
 
-class ApiV1EcommerceRecommendationUserGet200Response(BaseModel):
-    items: Optional[RecommendedProductList] = None
 
 
 class ApiV1EcommerceRecommendationUserProductPost200Response(BaseModel):
     items: Optional[RecommendedProductList] = None
+
+class ApiV1EcommerceRecommendationUserGet200Response(BaseModel):
+    items: Optional[RecommendedProductList] = None
+    
