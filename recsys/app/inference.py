@@ -65,24 +65,42 @@ def _fallback_products(fallback_list: Optional[pd.DataFrame], N: int) -> List[Di
     return fallback
 
 
+
 def recommend_products_for_user(
     user_id: str,
-    model: AlternatingLeastSquares,
+    model,  # AlternatingLeastSquares
     user_encoder,
     product_reverse_map: Dict[int, str],
+    user_items_csr,  # CSR matrix of user-item interactions; must be passed or accessible
     ratings: Optional[pd.DataFrame],
     df_sale: Optional[pd.DataFrame],
     fallback_list: Optional[pd.DataFrame] = None,
     N: int = 10
 ) -> List[Dict]:
     """Recommend top-N products for a given user."""
+    
+    def _fallback_products(fallback_df, n):
+        if fallback_df is None or fallback_df.empty:
+            return []
+        fallback_recs = []
+        for _, row in fallback_df.head(n).iterrows():
+            fallback_recs.append({
+                "product_id": row.get("product_id", "unknown"),
+                "product_name_en": row.get("product_name_en", "Unknown Product"),
+                "price": row.get("product_price", None),
+                "product_type": row.get("product_type", "Unknown"),
+                "relevance_score": None,
+                "recommendation_id": str(uuid.uuid4()),
+            })
+        return fallback_recs
+    
     if user_id not in user_encoder.classes_:
         return _fallback_products(fallback_list, N)
 
     try:
         user_idx = user_encoder.transform([user_id])[0]
         items, scores = model.recommend(user_idx, user_items_csr[user_idx], N)
-
+        
         results = []
         for item_idx, score in zip(items, scores):
             pid = product_reverse_map.get(item_idx)
@@ -92,25 +110,23 @@ def recommend_products_for_user(
             product_info = {
                 "product_id": pid,
                 "product_name_en": "Unknown Product",
-                "product_type": "Unknown",
                 "price": None,
-                "product_description_en": None,
+                "product_type": "Unknown",
+                "relevance_score": float(score),
+                "recommendation_id": str(uuid.uuid4()),
             }
 
             if df_sale is not None and not df_sale.empty:
-                row = df_sale[df_sale['product_id'] == pid].head(1)
+                row = df_sale[df_sale['product_id'] == pid]
                 if not row.empty:
-                    product_info["product_name_en"] = row.iloc[0].get("product_name_en", product_info["product_name_en"])
-                    product_info["product_type"] = row.iloc[0].get("product_type", product_info["product_type"])
-                    product_info["price"] = row.iloc[0].get("product_price", product_info["price"])
-                    product_info["product_description_en"] = row.iloc[0].get("product_description_en", product_info["product_description_en"])
+                    first_row = row.iloc[0]
+                    product_info["product_name_en"] = first_row.get("product_name_en", product_info["product_name_en"])
+                    product_info["price"] = first_row.get("product_price", product_info["price"])
+                    product_info["product_type"] = first_row.get("product_type", product_info["product_type"])
 
-            results.append({
-                **product_info,
-                "relevance_score": float(score),
-            })
+            results.append(product_info)
 
-        return results or _fallback_products(fallback_list, N)
+        return results if results else _fallback_products(fallback_list, N)
 
     except Exception as e:
         logger.error(f"Error in recommend_products_for_user: {e}")
