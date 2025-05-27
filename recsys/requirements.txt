@@ -9,7 +9,7 @@ implicit
 pydantic>=2.0
 requests
 huggingface_hub
-
+uvicorn==0.22.0
 
 
 
