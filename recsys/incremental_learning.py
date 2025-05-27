@@ -14,7 +14,7 @@ USER_ENCODER_FILE = os.path.join(MODEL_DIR, "user_encoder.pkl")
 PRODUCT_ENCODER_FILE = os.path.join(MODEL_DIR, "product_encoder.pkl")
 USER_ITEMS_FILE = os.path.join(MODEL_DIR, "user_items_csr.pkl")
 
-# --- Load saved model and encoders ---
+# load saved model and encoders ---
 @st.cache_resource
 def load_model_and_encoders():
     if not all(os.path.exists(f) for f in [MODEL_FILE, USER_ENCODER_FILE, PRODUCT_ENCODER_FILE, USER_ITEMS_FILE]):
@@ -33,7 +33,7 @@ def load_model_and_encoders():
     return model, user_enc, product_enc, user_items_csr
 
 
-# --- Predict ratings from user and product latent factors ---
+# function to predict ratings from user and product latent factors
 def predict_ratings(model, user_indices, product_indices):
     preds = []
     for u, p in zip(user_indices, product_indices):
@@ -45,7 +45,7 @@ def predict_ratings(model, user_indices, product_indices):
 
 
 # --- Streamlit UI ---
-st.title("🎯 Incremental Learning Demo: Recommendation System")
+st.title("🎯 Incremental Learning Prototype Demo: Recommendation System")
 
 st.markdown("""
 In **real-world systems**, user preferences and behaviors change constantly. Re-training on the full dataset every time is **too slow and costly**.
@@ -66,8 +66,7 @@ uploaded_file = st.file_uploader("📤 Upload new interaction data (CSV with `us
 
 if uploaded_file:
     df_new = pd.read_csv(uploaded_file)
-
-    # Accept either 'rating' or 'quantity' column as interaction strength
+    
     if 'rating' in df_new.columns:
         interaction_col = 'rating'
     elif 'quantity' in df_new.columns:
@@ -81,7 +80,7 @@ if uploaded_file:
         st.error(f"CSV must contain columns: {required_cols}")
         st.stop()
 
-    # Filter only known users and products
+    # filter based on only known users and products
     known_users = set(user_enc.classes_)
     known_products = set(product_enc.classes_)
     df_new = df_new[df_new['user_id'].isin(known_users) & df_new['product_id'].isin(known_products)]
@@ -92,12 +91,12 @@ if uploaded_file:
         df_new['user_encoded'] = user_enc.transform(df_new['user_id'])
         df_new['product_encoded'] = product_enc.transform(df_new['product_id'])
 
-        # Predictions BEFORE model update
+        # predictions before model update
         preds_before = predict_ratings(model, df_new['user_encoded'], df_new['product_encoded'])
         mse_before = mean_squared_error(df_new[interaction_col], preds_before)
         st.write(f"📉 RMSE on new data **before update**: `{np.sqrt(mse_before):.4f}`")
 
-        # Binary evaluation threshold: consider interaction relevant if quantity/rating >= 1 (adjust as needed)
+        # metrics
         y_true = (df_new[interaction_col] >= 1).astype(int)
         y_pred_before = (preds_before >= 1).astype(int)
         precision_b = precision_score(y_true, y_pred_before, zero_division=0)
@@ -106,14 +105,14 @@ if uploaded_file:
 
         st.write(f"**Precision (Before)**: `{precision_b:.4f}`  |  **Recall (Before)**: `{recall_b:.4f}`  |  **F1 Score (Before)**: `{f1_b:.4f}`")
 
-        # Update interaction matrix
+        # update interaction matrix
         new_matrix = coo_matrix(
             (df_new[interaction_col], (df_new['user_encoded'], df_new['product_encoded'])),
             shape=user_items_csr.shape
         )
         updated_matrix = user_items_csr + new_matrix.tocsr()
 
-        # Incremental update of the model (re-fit on updated matrix)
+        # incremental update of the model (re-fit on updated matrix)
         model.fit(updated_matrix.T)
 
         # Predictions AFTER model update
