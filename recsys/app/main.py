@@ -153,7 +153,7 @@ def recommend_for_user(user_id: UUID, N: int = 10):
 
 # GET /api/v1/ecommerce/recommendations/products/{product_id}
 @app.get(
-    '/api/v1/ecommerce/recommendation/product/{product_id}',
+    '/api/v1/ecommerce/recommendations/products/{product_id}',
     response_model=ApiV1EcommerceRecommendationUserProductPost200Response,
     responses={'404': {'model': ErrorResponse}},
 )
