@@ -210,7 +210,7 @@ def send_feedback_to_ga(feedback: ApiV1EcommerceRecommendationFeedbackPostReques
     return response
 
 @app.post(
-    "/api/v1/ecommerce/recommendation/feedback",
+    "/api/v1/ecommerce/recommendations/feedback",
     response_model=ApiV1EcommerceRecommendationFeedbackPostResponse,
 )
 def feedback(
