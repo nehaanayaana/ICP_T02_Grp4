@@ -1,0 +1,15 @@
+fastapi>=0.103.0 
+uvicorn==0.22.0
+pandas==1.5.3
+scipy==1.10.1
+scikit-learn==1.2.2
+numpy==1.24.2
+gunicorn==20.1.0
+implicit
+pydantic>=2.0
+requests
+huggingface_hub
+uvicorn==0.22.0
+
+
+
