@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SawitPRO - User Profile</title>
+<style>
+  :root {
+    --primary-green: #576A34;
+    --primary-yellow: #E9D037;
+    --dark-green: #3d4a24;
+    --light-green: #7a8f4a;
+    --text-dark: #2c3e10;
+    --text-light: #666;
+    --bg-light: #f8f9f6;
+    --white: #ffffff;
+    --shadow: 0 4px 20px rgba(87, 106, 52, 0.1);
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0; padding: 0;
+    background: var(--white);
+    color: var(--text-dark);
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+    padding: 1rem 2rem;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--white);
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-decoration: none;
+    margin-left: 1rem; /* margin for the SawitPRO text */
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-yellow);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--primary-green);
+    font-weight: bold;
+  }
+
+  nav .cart-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--white);
+    font-size: 1.5rem;
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 100px auto 40px;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .profile-wrapper {
+    display: flex;
+    gap: 30px;
+  }
+
+  .left-card {
+    background: var(--white);
+    border-radius: 15px;
+    padding: 2rem;
+    width: 280px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .left-card .profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+  }
+
+  .profile-pic svg {
+    width: 70px;
+    height: 70px;
+    fill: var(--light-green);
+  }
+
+  .username {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--primary-green);
+  }
+
+  .edit-profile-button {
+    background: var(--primary-yellow);
+    color: var(--primary-green);
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+
+  .edit-profile-button:hover {
+    box-shadow: 0 8px 25px rgba(233, 208, 55, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .nav-links li a {
+    text-decoration: none;
+    color: var(--text-dark);
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+
+  .nav-links li a:hover {
+    color: var(--primary-green);
+  }
+
+  .middle-card {
+    background: var(--white);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    flex-grow: 1;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .middle-card h2 {
+    margin-top: 0;
+  }
+
+  .profile-form label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .profile-form input,
+  .profile-form select {
+    width: 90%;
+    padding: 10px 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    height: 38px;
+    box-sizing: border-box;
+    margin-bottom: 16px;
+  }
+
+  .profile-form input:focus,
+  .profile-form select:focus {
+    outline: none;
+    border-color: var(--primary-green);
+  }
+
+  .save-button {
+    background: var(--primary-green);
+    color: var(--white);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 1rem;
+    align-self: flex-start;
+    transition: all 0.3s ease;
+  }
+
+  .save-button:hover {
+    background: var(--dark-green);
+    transform: translateY(-1px);
+  }
+
+  footer {
+    background: var(--primary-green);
+    color: var(--white);
+    text-align: center;
+    padding: 1rem 2rem;
+    font-size: 0.9rem;
+  }
+
+  footer a {
+    color: var(--primary-yellow);
+    text-decoration: none;
+    margin: 0 0.5rem;
+  }
+
+  footer a:hover {
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+<header>
+  <a href="#" class="logo" tabindex="0">
+    <div class="logo-icon" aria-hidden="true">S</div>
+    SawitPRO
+  </a>
+  <button class="cart-button" aria-label="Cart">🛒</button>
+</header>
+
+<main>
+  <div class="profile-wrapper">
+    <aside class="left-card" aria-label="User navigation menu">
+      <div class="profile-pic" aria-label="User profile picture">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </svg>
+      </div>
+      <div class="username">JohnDoe</div>
+      <button class="edit-profile-button">Edit Profile</button>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#">My Account</a></li>
+          <li><a href="#">Banks & Cards</a></li>
+          <li><a href="#">Addresses</a></li>
+          <li><a href="#">Change Password</a></li>
+          <li><a href="#">Notification Settings</a></li>
+          <li><a href="#">Privacy Settings</a></li>
+          <li><a href="#">My Purchase</a></li>
+          <li><a href="#">Notifications</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <section class="middle-card" aria-label="User profile form">
+      <h2>My Profile</h2>
+      <form class="profile-form" onsubmit="return false;">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          placeholder="Enter your username"
+          value="JohnDoe"
+          required
+        />
+
+        <label for="fullname">Full Name</label>
+        <input
+          id="fullname"
+          type="text"
+          placeholder="Enter your full name"
+          value="John Doe"
+          required
+        />
+
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          placeholder="example@domain.com"
+          value="john@example.com"
+          required
+        />
+
+        <label for="phone">Phone Number</label>
+        <input
+          id="phone"
+          type="tel"
+          placeholder="+62 812-3456-7890"
+          value="+62 812-3456-7890"
+          required
+        />
+
+        <label for="gender">Gender</label>
+        <select id="gender" required>
+          <option value="" disabled selected>Select your gender</option>
+          <option value="Male" selected>Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+          <option value="Prefer not to say">Prefer not to say</option>
+        </select>
+
+        <label for="dob">Date of Birth</label>
+        <input
+          id="dob"
+          type="date"
+          value="1990-01-01"
+          required
+          max="2025-12-31"
+          min="1900-01-01"
+        />
+
+        <button class="save-button" type="submit">Save</button>
+      </form>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <a href="#">Home</a> |
+  <a href="#">API Demo</a> |
+  <a href="#">Products</a> |
+  <a href="#">Contact</a> <br />
+  © 2024 SawitPRO. All rights reserved. | TokoSawit Product Recommendation System.
+</footer>
+</body>
+</html>
