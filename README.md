@@ -30,16 +30,23 @@ To develop on this project, you need to have the following installed:
 
 ```
 .
-├── app/                   # FastAPI project
-│   ├── main.py            # API implementation
+.
+├── app/                   
+│   ├── main.py            # FastAPI app
 │   └── requirements.txt   # Python dependencies
-├── docs/                  # API Documentation
-├── jupyter/               # Jupyter Notebook project to train the model
-│   └── work/              # Jupyter Notebook working directory
-│       └── notebook.ipynb # Jupyter Notebook file
-├── api.yaml               # OpenAPI specification file
-├── database.sql           # Database schema and data
-└── README.md              # This file
+├── frontend/              # <--- ✅ Frontend folder (add this)
+│   ├── public/            # Static assets (images, icons, etc.)
+│   ├── src/               # Source code (JS/TS, React, etc.)
+│   ├── dist/ or build/    # Compiled static files (to be served)
+│   └── index.html         # Entry HTML file if using plain HTML/CSS/JS
+├── docs/                  
+├── jupyter/              
+│   └── work/              
+│       └── notebook.ipynb 
+├── api.yaml               
+├── database.sql           
+└── README.md              
+
 ```
 
 ## Running the project
