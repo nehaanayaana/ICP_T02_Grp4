@@ -15,3 +15,55 @@ This app was refactored from [a16z's implementation](https://github.com/a16z-inf
 - https://icp-t02-grp4-api.onrender.com/docs
 
 
+# TokoSawit Product Recommendation API Project
+
+This project is a product recommendation API for the TokoSawit platform.
+
+## Requirements
+
+To develop on this project, you need to have the following installed:
+
+1. [Docker Desktop](https://docs.docker.com/get-docker/)
+2. [pgAdmin](https://www.pgadmin.org/download/)
+
+## Directory Structure
+
+```
+.
+├── app/                   # FastAPI project
+│   ├── main.py            # API implementation
+│   └── requirements.txt   # Python dependencies
+├── docs/                  # API Documentation
+├── jupyter/               # Jupyter Notebook project to train the model
+│   └── work/              # Jupyter Notebook working directory
+│       └── notebook.ipynb # Jupyter Notebook file
+├── api.yaml               # OpenAPI specification file
+├── database.sql           # Database schema and data
+└── README.md              # This file
+```
+
+## Running the project
+
+1. Start the project. To start the project, you need to go to Terminal or Command Prompt and run the following command:
+
+```bash
+docker compose up --build
+```
+
+The `--build` flag will build the images again. This is useful if you have changed the Dockerfile, say, to add more Python packages.
+
+2. Wait until the project is running. You can access below URLs:
+
+- API Documentation [(http://localhost:8001/)](http://localhost:8001/)
+- Jupyter Notebook [(http://localhost:8888)](http://localhost:8888)
+- API [(http://localhost:8000)](http://localhost:8000)
+
+3. You can stop the project by running:
+
+```bash
+docker compose down --volumes
+```
+
+The `--volumes` flag will remove the volumes associated with the containers.
+
+4. If you want to remove the existing data for PostgreSQL, you can remove all files inside the `postgres/data` directory.
