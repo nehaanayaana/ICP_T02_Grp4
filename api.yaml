@@ -1,0 +1,230 @@
+openapi: 3.0.4
+info:
+  title: TokoSawit ProductRecommendation API
+  description: |
+    This API provides recommendation system for TokoSawit. TokoSawit is an e-commerce platform, as part of the SawitPRO platform,
+    that provides a wide range of plantation equipment and supplies targetting Indonesian palm plantation smallholders.
+  termsOfService: https://www.sawitpro.com/term-and-condition
+  license:
+    name: proprietary
+    url: https://www.sawitpro.com/license
+  version: 1.0.0
+servers:
+  - url: https://tokosawit-product-recommendation.api.sawitpro.com
+    description: The best project will be deployed in this API.
+paths:
+  /ping:
+    get:
+      summary: |
+        Ping the API to check if it is running.
+      operationId: Ping
+      security:
+        - apiKey: []
+      responses:
+        "200":
+          description: The API is running.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PingGet200Response"
+        "401":
+          description: Unauthorized. The API key is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/ecommerce/recommendation/user/{user_id}:
+    get:
+      summary: |
+        Get recommendation for a specific user. This will return list of products that are recommended for the user.
+        This will return 10 products at most.
+      operationId: ApiV1EcommerceRecommendationUserGet
+      security:
+        - apiKey: []
+      parameters:
+        - name: user_id
+          description: The ID of the user that will be used to get the recommendation
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: A list of recommended products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiV1EcommerceRecommendationUserGet200Response"
+        "404":
+          description: Not Found. The requested resource is not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/ecommerce/recommendation/product/{product_id}:
+    get:
+      summary: |
+        Get recommendation for a specific product. This will return list of products that are recommended for the product.
+        This will return 10 products at most.
+      operationId: ApiV1EcommerceRecommendationProductGet
+      security:
+        - apiKey: []
+      parameters:
+        - name: product_id
+          description: The ID of the product that the user is interested in
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: A list of recommended products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiV1EcommerceRecommendationUserProductPost200Response"
+        "404":
+          description: Not Found. The requested resource is not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/ecommerce/recommendation/feedback:
+    post:
+      summary: |
+        Give a feedback to the recommendation system.
+      operationId: ApiV1EcommerceRecommendationFeedbackPost
+      security:
+        - apiKey: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiV1EcommerceRecommendationFeedbackPostRequestBody"
+      responses:
+        "200":
+          description: The feedback is given successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Feedback given successfully"
+        "400":
+          description: Bad Request. The request is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    ApiV1EcommerceRecommendationUserGet200Response:
+      type: object
+      properties:
+        items:
+          $ref: "#/components/schemas/RecommendedProductList"
+    ApiV1EcommerceRecommendationUserProductPost200Response:
+      type: object
+      properties:
+        items:
+          $ref: "#/components/schemas/RecommendedProductList"
+    RecommendedProductList:
+      type: array
+      items:
+        $ref: "#/components/schemas/RecommendedProductListItem"
+    RecommendedProductListItem:
+      type: object
+      properties:
+        product_id:
+          type: string
+          format: uuid
+          description: |
+            The ID of the product.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: |
+            The name of the product.
+          example: "Fertilizer ABC"
+        category:
+          type: string
+          description: |
+            The category of the product.
+          example: "Fertilizer"
+        price:
+          type: number
+          description: |
+            The price of the product in IDR.
+          example: 100000
+        recommendation_id:
+          type: string
+          format: uuid
+          description: |
+            The ID of the recommendation. This will be used to give a feedback to the recommendation system,
+            whether the recommendation is good or not.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        relevance_score:
+          type: number
+          description: |
+            The relevance score of the product based on the recommendation model.
+          example: 0.95
+    ApiV1EcommerceRecommendationFeedbackPostRequestBody:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: |
+            The ID of the user that will be used to give a feedback to the recommendation system.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        product_id:
+          type: string
+          format: uuid
+          description: |
+            The ID of the product that will be used to give a feedback to the recommendation system.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        recommendation_id:
+          type: string
+          format: uuid
+          description: |
+            The ID of the recommendation that will be used to give a feedback to the recommendation system.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        action:
+          type: string
+          enum:
+            - clicked
+            - added_to_cart
+            - purchased
+            - reviewed
+          description: |
+            The action that will be used to give a feedback to the recommendation system.
+          example: "clicked"
+    PingGet200Response:
+      type: object
+      properties:
+        message:
+          type: string
+          description: |
+            The message that will be returned when the API is running.
+          example: "Pong"
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: |
+            The error message.
+          example: "Not Found"
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+      description: |
+        The API key to use for authentication.

@@ -1,0 +1,84 @@
+services:
+    ############################################################
+    # API
+    # This service will run the API server
+    # Once you run the `docker compose up` command, the API server will start
+    # You can access the API server at http://localhost:8000
+    ############################################################
+    api: 
+        build: 
+            context: app
+            dockerfile: Dockerfile
+        ports:
+            - "8000:8000"
+        volumes:
+            - ./app:/app
+            - ./shared:/shared
+        environment:
+            DATABASE_URL: postgresql://postgres:postgres@db:5432/postgres
+            SHARED_DIR: /shared
+        depends_on:
+            - db
+
+    ############################################################
+    # DB
+    # This service will run the database
+    ############################################################
+    db:
+        image: postgres:15
+        ports:
+            - 5432:5432
+        expose:
+            - 5432
+        restart: always
+        environment:
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=postgres
+            - POSTGRES_USER=postgres
+        volumes:
+            # Load database schema from ./database.sql
+            # If you want to reload new database schema, you need to execute
+            # `docker-compose down --volumes` first to remove the volume.
+            - ./database.sql:/docker-entrypoint-initdb.d/database.sql
+            - ./postgres/data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 10s
+            timeout: 5s
+            retries: 3
+    ############################################################
+    # Jupyter Notebook
+    # This service will run the Jupyter Notebook server
+    # You can access the Jupyter Notebook server at http://localhost:8888
+    ############################################################
+    jupyter:
+        build:
+            context: jupyter
+            dockerfile: Dockerfile
+        ports:
+            - "8888:8888"
+        volumes:
+            - ./jupyter/work:/home/jovyan/work
+            - ./shared:/shared
+        environment:
+            JUPYTER_ENABLE_LAB: "yes"
+            DATABASE_URL: postgresql://postgres:postgres@db:5432/postgres
+            SHARED_DIR: /shared
+        command: start-notebook.sh --NotebookApp.token=''
+        depends_on:
+            - db
+    ############################################################
+    # API Documentation
+    # This service will run the API documentation server
+    # You can access the API documentation at http://localhost:8001
+    ############################################################     
+    api_docs:
+        image: nginx:latest
+        ports:
+            - "8001:80"
+        volumes:
+            - ./docs:/usr/share/nginx/html
+
+volumes:
+    postgres_data:
+    shared_dir:
