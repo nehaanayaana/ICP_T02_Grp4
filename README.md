@@ -74,3 +74,6 @@ docker compose down --volumes
 The `--volumes` flag will remove the volumes associated with the containers.
 
 4. If you want to remove the existing data for PostgreSQL, you can remove all files inside the `postgres/data` directory.
+
+
+test
