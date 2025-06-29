@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SawitPRO - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="{{ url_for('home') }}" class="logo">
+                <img src="{{ url_for('static', filename='PetaniCerdas Logo.jpg') }}" alt="PetaniCerdas Logo" class="logo-icon">
+                PetaniCerdas
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+                <li><a href="{{ url_for('product_listing') }}" {% if request.endpoint == 'product_listing' %}class="active"{% endif %}>Products</a></li>
+                <li><a href="{{ url_for('cart') }}" {% if request.endpoint == 'cart' %}class="active"{% endif %}>Cart</a></li>
+                <li><a href="{{ url_for('home') }}#contact" {% if 'contact' in request.path %}class="active"{% endif %}>Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer id="contact">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('product_listing') }}">Products</a>
+                <a href="{{ url_for('cart') }}">Cart</a>
+                <a href="mailto:info@sawitpro.com">Contact</a>
+            </div>
+            <p>&copy; 2024 SawitPRO. All rights reserved. | TokoSawit Product Recommendation System</p>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
