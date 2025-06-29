@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with PalmPal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="chatbot-fullscreen-container">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <span>🌴</span>
+                <span>Chat with PalmPal</span>
+            </div>
+            <div class="chatbot-controls">
+                <button class="chatbot-control-btn" onclick="window.location.href = '/'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="message bot">
+                <div class="message-content">
+                    Hello! I'm your AI palm plantation assistant. How can I help you with your plantation today?
+                </div>
+            </div>
+            <div class="sample-prompts">
+                <button class="sample-prompt" onclick="useSamplePrompt(this)">What's the best fertilizer for mature palm trees?</button>
+                <button class="sample-prompt" onclick="useSamplePrompt(this)">How to control pest infestations?</button>
+                <button class="sample-prompt" onclick="useSamplePrompt(this)">Recommend products for soil improvement</button>
+                <button class="sample-prompt" onclick="useSamplePrompt(this)">Best harvesting practices for maximum yield</button>
+            </div>
+        </div>
+        <div class="typing-indicator" id="typingIndicator">
+            <span>PalmPal is typing</span>
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbotInput" placeholder="Ask about palm plantation..." onkeypress="handleChatInput(event)">
+            <button class="send-btn" onclick="sendChatMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function useSamplePrompt(button) {
+            document.getElementById('chatbotInput').value = button.textContent;
+            document.getElementById('chatbotInput').focus();
+        }
+
+        function handleChatInput(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatbotInput');
+            const message = input.value.trim();
+            if (message === '') return;
+
+            const messagesContainer = document.getElementById('chatbotMessages');
+
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.innerHTML = `<div class="message-content">${message}</div>`;
+            messagesContainer.appendChild(userMessage);
+
+            // Clear input
+            input.value = '';
+
+            // Show typing indicator
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.style.display = 'flex';
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Simulate bot response
+            setTimeout(() => {
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot';
+                botMessage.innerHTML = `<div class="message-content">Thank you for your message! I'm here to help with any questions about palm plantation.</div>`;
+                messagesContainer.appendChild(botMessage);
+                typingIndicator.style.display = 'none';
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
