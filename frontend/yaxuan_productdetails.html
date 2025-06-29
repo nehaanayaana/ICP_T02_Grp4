@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<section class="product-details">
+    <div class="container">
+        <div class="product-detail-card">
+            <div class="product-detail-image">
+                <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
+            </div>
+            <div class="product-detail-info">
+                <h1>{{ product.name }}</h1>
+                <div class="product-rating">
+                    <div class="stars">
+                        {% for i in range(5) %}
+                            {% if i < product.rating|int %}
+                                ⭐
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                        <span class="rating-text">({{ product.rating }})</span>
+                    </div>
+                </div>
+                <div class="price-section">
+                    <span class="price">Rp {{ "{:,.2f}".format(product.price) }}</span>
+                </div>
+                <div class="stock-info">
+                    <strong>Stock:</strong>
+                    {% if product.stock > 20 %}
+                        In Stock ({{ product.stock }})
+                    {% elif product.stock > 0 %}
+                        Low Stock ({{ product.stock }})
+                    {% else %}
+                        Out of Stock
+                    {% endif %}
+                </div>
+                <div class="dosage-info">
+                    <strong>Dosage:</strong> {{ product.dosage }}
+                </div>
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="addToCart('{{ product.id }}')" {% if product.stock == 0 %}disabled{% endif %}>
+                        {% if product.stock > 0 %}Add to Cart{% else %}Out of Stock{% endif %}
+                    </button>
+                    <button class="btn-secondary" onclick="contactSeller()">Contact Seller</button>
+                </div>
+            </div>
+        </div>
+        <div class="product-description">
+            <h3>Description</h3>
+            <p>{{ product.description }}</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function addToCart(productId) {
+        fetch('/add_to_cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                quantity: 1
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Product added to cart!');
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while adding the product to the cart');
+        });
+    }
+
+    function contactSeller() {
+        alert("Contacting seller...");
+    }
+</script>
+{% endblock %}
