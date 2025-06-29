@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Product Catalog{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="product-hero">
+    <div class="hero-content">
+        <h1 class="product-catalog-title">Product Catalog</h1>
+        <p class="product-catalog-description">Discover premium palm oil plantation supplies and expert agricultural solutions</p>
+    </div>
+</section>
+
+
+<section class="products-catalog">
+    <div class="container">
+        <div class="products-header">
+            <h2>{{ products|length }} Products Found</h2>
+        </div>
+
+        <div class="products-grid" id="productsContainer">
+            {% for product in products %}
+            <div class="product-listing-card" data-category="{{ product.category }}">
+                <a href="{{ url_for('product_details', product_id=product.id) }}">
+                    <div class="product-image-container">
+                        <img src="{{ url_for('static', filename='images/' + product.image) }}"
+                             alt="{{ product.name }}"
+                             class="product-image"
+                             onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
+                        <div class="stock-indicator {% if product.stock > 20 %}in-stock{% elif product.stock > 0 %}low-stock{% else %}out-of-stock{% endif %}">
+                            {% if product.stock > 20 %}
+                                In Stock ({{ product.stock }})
+                            {% elif product.stock > 0 %}
+                                Low Stock ({{ product.stock }})
+                            {% else %}
+                                Out of Stock
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+
+                <div class="product-info">
+                    <div class="product-category">{{ product.category }}</div>
+                    <h3 class="product-name"><a href="{{ url_for('product_details', product_id=product.id) }}">{{ product.name }}</a></h3>
+                    <div class="product-rating">
+                        <div class="stars">
+                            {% for i in range(5) %}
+                                {% if i < product.rating|int %}
+                                    ⭐
+                                {% else %}
+                                    ☆
+                                {% endif %}
+                            {% endfor %}
+                            <span class="rating-text">({{ product.rating }})</span>
+                        </div>
+                    </div>
+                    <div class="price-section">
+                        <span class="price">Rp {{ "{:,.2f}".format(product.price) }}</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-primary" onclick="addToCart('{{ product.id }}')" {% if product.stock == 0 %}disabled{% endif %}>
+                            {% if product.stock > 0 %}Add to Cart{% else %}Out of Stock{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function addToCart(productId) {
+        fetch('/add_to_cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                quantity: 1
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Product added to cart!');
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while adding the product to the cart');
+        });
+    }
+</script>
+{% endblock %}
